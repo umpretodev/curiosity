@@ -15,8 +15,8 @@ NavigatorNode::NavigatorNode() : Node("navigator_node") {
     this->goals = {{14, -7.5}};
     this->current_goal_index = 0;
 
-    this-> goal1_flag = false;
-    this-> goal2_flag = false;
+    //this-> goal1_flag = false;
+    //this-> goal2_flag = false;
 
     odom_sub = this->create_subscription<nav_msgs::msg::Odometry>("/odom", 10, std::bind(&NavigatorNode::odom_callback, this, std::placeholders::_1));
     scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>("/base_scan", 10, std::bind(&NavigatorNode::scan_callback, this, std::placeholders::_1));
@@ -49,7 +49,7 @@ void NavigatorNode::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr m
     obstacle_detected = false;
 
     for (float range : msg->ranges) {
-        if (range < 1 && range > msg->range_min) {
+        if (range < 0.3 && range > msg->range_min) {
             obstacle_detected = true;
             break;
         }
@@ -90,12 +90,11 @@ void NavigatorNode::control_loop() {
     geometry_msgs::msg::Twist cmd;
 
 
-    if (goal_distance < 0.5) {
+    if (goal_distance < 0.3) {
         RCLCPP_INFO(this->get_logger(), "Goal %ld alcançado! \a", current_goal_index + 1);
 
         cmd.linear.x = 0;
         cmd.angular.z = 0;
-
         cmd_pub->publish(cmd);
 
         current_goal_index++;
@@ -111,6 +110,7 @@ void NavigatorNode::control_loop() {
         cmd.angular.z = 0;
 
         cmd_pub->publish(cmd);
+        return;
     }
 
 
