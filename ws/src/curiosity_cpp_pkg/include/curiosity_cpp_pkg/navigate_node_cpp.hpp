@@ -19,8 +19,8 @@ private:
     bool pose_received;
     bool obstacle_detected;
 
-    bool goal1_flag;
-    bool goal2_flag;
+    bool goal1_checked;
+    bool goal2_checked;
 
     vector<pair<double, double>> goals;
     size_t current_goal_index;
@@ -34,8 +34,8 @@ private:
     void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
     void control_loop();
 
-    void handle_goal1();
-
+    void handle_goal_by_go_to_goal_strategy(size_t goal_index);
+    void handle_goal_by_wall_following_strategy(size_t goal_index);
 };
 
 #endif
