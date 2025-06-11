@@ -19,7 +19,7 @@ run-node:
 	@echo "Running navigator node..."
 	@bash -c "source /opt/ros/humble/setup.bash && source $(INSTALL_PATH) && ros2 run curiosity_cpp_pkg navigator_node"
 
-run-all:
+run:
 	@echo "Running everything..."
 	@gnome-terminal -- bash -c "make run-stage"
 	@gnome-terminal -- bash -c "sleep 2 && make run-node"
