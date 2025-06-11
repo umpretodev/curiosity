@@ -75,19 +75,36 @@ void NavigatorNode::handle_goal_by_wall_following_strategy(size_t goal_index) {
 
     switch (wall_follow_state) {
         case WallFollowState::TURNING_UP : {
-            RCLCPP_INFO(this->get_logger(), "📍 Alinhado para cima. Avançando até parede.");
-            
+            RCLCPP_INFO(this->get_logger(), "📍 Up aligning.");
+
             cmd.angular.z = MathUtil::convert_graus_to_radians(15);
             cmd_pub->publish(cmd);
+
+            rclcpp::sleep_for(std::chrono::seconds(5));
             wall_follow_state = WallFollowState::ADVANCING;
             break;
+
         }
 
         case WallFollowState::ADVANCING: {
-            RCLCPP_INFO(this->get_logger(), "📍 UP.");
-            //cmd.linear.x = .5;
-            //cmd_pub->publish(cmd);
-            //wall_follow_state = WallFollowState::ADVANCING;
+            RCLCPP_INFO(this->get_logger(), "📍 Move to UP.");
+            cmd.linear.x = .5;
+            cmd_pub->publish(cmd);
+
+            rclcpp::sleep_for(std::chrono::seconds(3));
+
+            if (this->obstacle_detected && wall_follow_state == WallFollowState::ADVANCING) {
+                wall_follow_state = WallFollowState::ADVANCING;
+                cmd.linear.x = 0;
+                cmd_pub->publish(cmd);
+
+                wall_follow_state = WallFollowState::FOLLOWING_WALL;
+            }
+
+            break;
+        }
+
+        case WallFollowState::FOLLOWING_WALL : {
             break;
         }
     }

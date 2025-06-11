@@ -26,6 +26,9 @@ private:
     bool pose_received;
     bool obstacle_detected;
 
+
+    bool obstacle_ahead_detected;
+
     bool goal1_checked;
     bool goal2_checked;
 
