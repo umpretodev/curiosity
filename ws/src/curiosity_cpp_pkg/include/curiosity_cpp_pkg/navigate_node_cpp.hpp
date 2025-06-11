@@ -10,6 +10,13 @@
 
 using namespace std;
 
+enum class WallFollowState {
+    TURNING_UP,
+    ADVANCING,
+    FOLLOWING_WALL,
+    TURNING_UP_AGAIN
+};
+
 class NavigatorNode : public rclcpp::Node {
 public:
     NavigatorNode();
@@ -21,6 +28,8 @@ private:
 
     bool goal1_checked;
     bool goal2_checked;
+
+    WallFollowState wall_follow_state;
 
     vector<pair<double, double>> goals;
     size_t current_goal_index;

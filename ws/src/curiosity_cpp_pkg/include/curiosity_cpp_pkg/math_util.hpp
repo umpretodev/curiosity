@@ -4,6 +4,7 @@
 class MathUtil {
 public:
     static double normalize_angle(double theta);
+    static double convert_graus_to_radians(double theta);
 };
 
 

@@ -19,6 +19,8 @@ NavigatorNode::NavigatorNode() : Node("navigator_node") {
     this-> goal1_checked = false;
     this-> goal2_checked = false;
 
+    this->wall_follow_state = WallFollowState::TURNING_UP;
+
     odom_sub = this->create_subscription<nav_msgs::msg::Odometry>("/odom", 10, std::bind(&NavigatorNode::odom_callback, this, std::placeholders::_1));
     scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>("/base_scan", 10, std::bind(&NavigatorNode::scan_callback, this, std::placeholders::_1));
     cmd_pub = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
@@ -58,10 +60,43 @@ void NavigatorNode::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr m
 }
 
 void NavigatorNode::handle_goal_by_wall_following_strategy(size_t goal_index) {
-    RCLCPP_INFO(this->get_logger(), "Letssssss gooooooooooooooooo (7, 3)! 🚩\a");
+    auto [goal_x, goal_y] = this->goals[goal_index];
+
+    double dx = goal_x - this->x;
+    double dy = goal_y - this->y;
+    double goal_distance = std::hypot(dx, dy);
+
+    double angle_to_goal = std::atan2(dy, dx);
+    double angle_diff = angle_to_goal - this->theta;
+
+    angle_diff = MathUtil::normalize_angle(angle_diff);
+
+    geometry_msgs::msg::Twist cmd;
+
+    switch (wall_follow_state) {
+        case WallFollowState::TURNING_UP : {
+            RCLCPP_INFO(this->get_logger(), "📍 Alinhado para cima. Avançando até parede.");
+            
+            cmd.angular.z = MathUtil::convert_graus_to_radians(15);
+            cmd_pub->publish(cmd);
+            wall_follow_state = WallFollowState::ADVANCING;
+            break;
+        }
+
+        case WallFollowState::ADVANCING: {
+            RCLCPP_INFO(this->get_logger(), "📍 UP.");
+            //cmd.linear.x = .5;
+            //cmd_pub->publish(cmd);
+            //wall_follow_state = WallFollowState::ADVANCING;
+            break;
+        }
+    }
+
+    //cmd_pub->publish(cmd);
 }
 
 void NavigatorNode::handle_goal_by_go_to_goal_strategy(size_t goal_index) {
+
     auto [goal_x, goal_y] = this->goals[goal_index];
 
     double dx = goal_x - this->x;
@@ -88,7 +123,11 @@ void NavigatorNode::handle_goal_by_go_to_goal_strategy(size_t goal_index) {
         return;
     }
 
-    if (obstacle_detected) {
+    if (obstacle_detected && !this->goal1_checked) {
+        this->goal1_checked = true;
+
+        if (this->current_goal_index == 0) this->current_goal_index++;
+
         RCLCPP_INFO(this->get_logger(), "\a");
 
         cmd.angular.z = 0.0; 
@@ -97,6 +136,11 @@ void NavigatorNode::handle_goal_by_go_to_goal_strategy(size_t goal_index) {
         cmd_pub->publish(cmd);
         return;
     }
+
+    // Log info
+    RCLCPP_INFO(this->get_logger(), "Pos (%.2f, %.2f), Theta: %.2f, Goal %ld: (%.2f, %.2f), Dist: %.2f, Obs: %s",
+                this->x, this->y, this->theta, current_goal_index + 1, goal_x, goal_y, goal_distance,
+                obstacle_detected ? "SIM" : "NÃO");
 
     cmd.angular.z = angle_diff;
     cmd.linear.x = .5;

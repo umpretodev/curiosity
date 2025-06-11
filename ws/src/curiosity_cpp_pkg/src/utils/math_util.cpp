@@ -7,3 +7,7 @@ double MathUtil::normalize_angle(double theta) {
 
     return theta;
 };
+
+double MathUtil::convert_graus_to_radians(double theta) {
+    return theta * M_PI / 180.0;
+}
