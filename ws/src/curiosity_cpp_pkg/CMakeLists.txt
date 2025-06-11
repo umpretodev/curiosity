@@ -14,7 +14,7 @@ find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 
-add_executable(navigator_node src/navigate_node_cpp.cpp src/main.cpp)
+add_executable(navigator_node src/nodes/navigate_node_cpp.cpp src/main.cpp)
 
 target_include_directories(navigator_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

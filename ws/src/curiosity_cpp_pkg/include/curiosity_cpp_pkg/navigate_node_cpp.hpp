@@ -8,27 +8,34 @@
 #include <vector>
 #include <utility>
 
-class NavigatorNode : public rclcpp::Node
-{
+using namespace std;
+
+class NavigatorNode : public rclcpp::Node {
 public:
     NavigatorNode();
 
 private:
+    double x, y, theta;
+    bool pose_received;
+    bool obstacle_detected;
+
+    bool goal1_flag;
+    bool goal2_flag;
+
+    vector<pair<double, double>> goals;
+    size_t current_goal_index;
+
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub;
+    rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_pub;
+    rclcpp::TimerBase::SharedPtr timer_;
+
     void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg);
     void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
     void control_loop();
 
-    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
-    rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_pub_;
-    rclcpp::TimerBase::SharedPtr timer_;
+    void handle_goal1();
 
-    double x_, y_, theta_;
-    bool pose_received_;
-    bool obstacle_detected_;
-
-    std::vector<std::pair<double, double>> goals_;
-    size_t current_goal_index_;
 };
 
-#endif // CURIOSITY_CPP_PKG_NAVIGATE_NODE_CPP_HPP_
+#endif
