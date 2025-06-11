@@ -116,5 +116,5 @@ void NavigatorNode::control_loop() {
         return;
     }
 
-    this->goal1_checked ? this->handle_goal_by_go_to_goal_strategy(current_goal_index) : this->handle_goal_by_wall_following_strategy(current_goal_index);
+    this->goal1_checked ? this->handle_goal_by_wall_following_strategy(current_goal_index) : this->handle_goal_by_go_to_goal_strategy(current_goal_index);
 }
